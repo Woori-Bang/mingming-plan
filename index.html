@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>밍밍 머니 플랜</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;500;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: single reading column, a money-flow bar up top, then numbered sections as ledger-style tables */
+:root {
+  --bg: #f3f5f8;
+  --surface: #ffffff;
+  --fg: #1a2130;
+  --muted: #5d6779;
+  --line: #dde2ea;
+  --accent: #2c4fb8;
+  --accent-soft: #e6ecfb;
+  --fixed: #8a94a8;
+  --save: #2c4fb8;
+  --spend: #d9893b;
+  --life: #4f9b8a;
+  --warn: #b5482f;
+  --font-display: "Gothic A1", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --font-body: "Gothic A1", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --font-num: "IBM Plex Mono", ui-monospace, "Consolas", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12161f; --surface: #1a202c; --fg: #e6e9f0; --muted: #9aa4b8; --line: #2c3444;
+    --accent: #8ea8f5; --accent-soft: #232d48; --fixed: #677187; --save: #7d98ec; --spend: #e3a160; --life: #6cbca9; --warn: #ec8a72;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12161f; --surface: #1a202c; --fg: #e6e9f0; --muted: #9aa4b8; --line: #2c3444;
+  --accent: #8ea8f5; --accent-soft: #232d48; --fixed: #677187; --save: #7d98ec; --spend: #e3a160; --life: #6cbca9; --warn: #ec8a72;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg);
+  font-family: var(--font-body); font-size: 15px; line-height: 1.7;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 40px 64px;
+}
+.wrap { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 44px; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(28px, 6vw, 38px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.25; }
+h2 { font-size: 21px; font-weight: 800; letter-spacing: -0.01em; display: flex; align-items: baseline; gap: 10px; }
+h2 .no { font-family: var(--font-num); font-size: 13px; color: var(--accent); font-weight: 600; }
+p { margin: 0; max-width: 65ch; }
+.eyebrow { font-size: 12px; letter-spacing: 0.08em; color: var(--muted); font-weight: 700; }
+.num { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+section { display: flex; flex-direction: column; gap: 16px; }
+.note { color: var(--muted); font-size: 13.5px; }
+
+header { display: flex; flex-direction: column; gap: 14px; }
+.lede { font-size: 17px; color: var(--muted); }
+.lede b { color: var(--fg); }
+
+/* money flow */
+.flow { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 22px; display: flex; flex-direction: column; gap: 16px; }
+.flow-head { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px; }
+.flow-head .total { font-family: var(--font-num); font-size: 26px; font-weight: 600; }
+.bar { display: flex; height: 34px; border-radius: 6px; overflow: hidden; gap: 2px; }
+.bar span { display: block; height: 100%; }
+.legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px 18px; margin: 0; padding: 0; list-style: none; }
+.legend li { display: flex; flex-direction: column; font-size: 13px; color: var(--muted); }
+.legend li .k { display: flex; align-items: center; gap: 7px; }
+.legend li .k i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+.legend li .v { font-family: var(--font-num); color: var(--fg); font-size: 15px; font-weight: 500; padding-left: 17px; }
+
+/* people */
+.people { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+.person { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; display: flex; flex-direction: column; gap: 6px; }
+.person .who { font-weight: 800; font-size: 16px; }
+.person .who small { font-weight: 500; color: var(--muted); font-size: 13px; margin-left: 6px; }
+.person .left { font-family: var(--font-num); font-size: 24px; font-weight: 600; }
+.person.tight .left { color: var(--warn); }
+.ratio { display: flex; flex-direction: column; gap: 6px; font-size: 13.5px; }
+.ratio .row { display: grid; grid-template-columns: 76px 1fr; align-items: center; gap: 10px; color: var(--muted); }
+.ratio .track { display: flex; height: 12px; border-radius: 3px; overflow: hidden; gap: 2px; }
+.ratio .a { background: var(--accent); }
+.ratio .b { background: var(--life); }
+
+/* tables */
+.tbl { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 460px; }
+th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: 12px; letter-spacing: 0.05em; color: var(--muted); font-weight: 700; background: var(--accent-soft); }
+tr:last-child td { border-bottom: 0; }
+td.r, th.r { text-align: right; font-family: var(--font-num); font-variant-numeric: tabular-nums; white-space: nowrap; }
+tr.sum td { font-weight: 800; background: var(--accent-soft); }
+tr.minus td.r { color: var(--muted); }
+td .sub { color: var(--muted); font-size: 13px; }
+
+.callout { border-left: 3px solid var(--accent); background: var(--accent-soft); padding: 14px 16px; border-radius: 0 8px 8px 0; font-size: 14.5px; }
+.callout.warn { border-left-color: var(--muted); background: var(--surface); }
+
+ol.steps, ul.points { margin: 0; padding-left: 1.3em; display: flex; flex-direction: column; gap: 12px; max-width: 65ch; }
+ol.steps li::marker { font-family: var(--font-num); color: var(--accent); font-weight: 600; }
+
+.check { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+.check li { border-bottom: 1px solid var(--line); }
+.check li:last-child { border-bottom: 0; }
+.check label { display: flex; gap: 12px; align-items: flex-start; padding: 12px 16px; cursor: pointer; }
+.check input { margin-top: 5px; width: 17px; height: 17px; accent-color: var(--accent); flex: none; }
+.check input:checked + span { color: var(--muted); text-decoration: line-through; }
+.check input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+footer { font-size: 12.5px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; }
+@media (max-width: 480px) { body { font-size: 14.5px; } .flow { padding: 16px; } }
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">방울 · 영맨 · 2026년 10월 기준</div>
+    <h1>밍밍 머니 플랜</h1>
+    <p class="lede">둘이 합쳐 실수령 월 약 <b class="num">844만</b> 원, 고정지출 <b class="num">572만</b> 원. 매달 <b>약 272만 원이 남아요.</b> 다만 영맨은 고정지출을 내고 나면 약 37만 원만 남아서 분담을 조정하려고 해요.</p>
+  </header>
+
+  <div class="flow" aria-label="월 실수령 사용처">
+    <div class="flow-head">
+      <span class="eyebrow">한 달 실수령 844만 원은 이렇게 써요</span>
+      <span class="total">8,440,000</span>
+    </div>
+    <div class="bar" role="img" aria-label="고정지출 447만, 기존 저축 125만, 용돈 80만, 생활비 증액 30만, 비정기 적립 25만, 비상금·투자 137만">
+      <span style="flex:447.4;background:var(--fixed)"></span>
+      <span style="flex:125;background:var(--save);opacity:.6"></span>
+      <span style="flex:80;background:var(--spend)"></span>
+      <span style="flex:30;background:var(--life)"></span>
+      <span style="flex:25;background:var(--life);opacity:.6"></span>
+      <span style="flex:136.6;background:var(--save)"></span>
+    </div>
+    <ul class="legend">
+      <li><span class="k"><i style="background:var(--fixed)"></i>고정지출 (저축 제외)</span><span class="v">4,474,021</span></li>
+      <li><span class="k"><i style="background:var(--save);opacity:.6"></i>기존 저축</span><span class="v">1,250,000</span></li>
+      <li><span class="k"><i style="background:var(--spend)"></i>개인 용돈 (각 40만)</span><span class="v">800,000</span></li>
+      <li><span class="k"><i style="background:var(--life)"></i>생활비 증액</span><span class="v">300,000</span></li>
+      <li><span class="k"><i style="background:var(--life);opacity:.6"></i>비정기 지출 적립</span><span class="v">250,000</span></li>
+      <li><span class="k"><i style="background:var(--save)"></i>비상금 → 투자</span><span class="v">≈1,366,000</span></li>
+    </ul>
+    <p class="note">저축(기존 125만 + 새 137만) = 월 약 261만 원, 실수령의 <b>약 31%</b>. 대출 원금 상환까지 치면 더 높아요.</p>
+  </div>
+
+  <section>
+    <h2><span class="no">00</span>실수령액 추정 (월)</h2>
+    <div class="people">
+      <div class="person">
+        <div class="who">방울<small>연봉 7,738만</small></div>
+        <div class="note">실수령 약 5,250,000 · 고정지출 부담 2,901,725</div>
+        <div class="left">+2,348,000</div>
+        <div class="note">고정지출 낸 뒤 남는 돈</div>
+      </div>
+      <div class="person tight">
+        <div class="who">영맨<small>연봉 4,500만</small></div>
+        <div class="note">실수령 약 3,190,000 · 고정지출 부담 2,822,296</div>
+        <div class="left">+368,000</div>
+        <div class="note">고정지출 낸 뒤 남는 돈</div>
+      </div>
+    </div>
+    <div class="ratio" aria-label="수입 비율과 고정지출 분담 비율 비교">
+      <div class="row"><span>수입</span><div class="track"><span class="a" style="flex:63"></span><span class="b" style="flex:37"></span></div></div>
+      <div class="row"><span>고정지출</span><div class="track"><span class="a" style="flex:50.7"></span><span class="b" style="flex:49.3"></span></div></div>
+      <p class="note">파랑 방울 · 초록 영맨. 수입은 63 : 37인데 고정지출은 거의 50 : 50으로 나눠 내고 있어요.</p>
+    </div>
+    <div class="tbl">
+      <table>
+        <thead><tr><th></th><th class="r">방울</th><th class="r">영맨</th></tr></thead>
+        <tbody>
+          <tr><td>세전 월급</td><td class="r">6,448,000</td><td class="r">3,750,000</td></tr>
+          <tr class="minus"><td>국민연금 (4.75%)</td><td class="r">−303,000</td><td class="r">−178,000</td></tr>
+          <tr class="minus"><td>건강보험 + 장기요양</td><td class="r">−262,000</td><td class="r">−153,000</td></tr>
+          <tr class="minus"><td>고용보험</td><td class="r">−58,000</td><td class="r">−34,000</td></tr>
+          <tr class="minus"><td>소득세 + 지방세</td><td class="r">−574,000</td><td class="r">−192,000</td></tr>
+          <tr class="sum"><td>실수령 (추정)</td><td class="r">≈5,250,000</td><td class="r">≈3,190,000</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">가정: 상여 없이 연봉을 12로 나눔, 비과세 식대 제외, 부양가족은 본인만. 실제 명세서와 ±5% 정도 다를 수 있어요.</p>
+  </section>
+
+  <section>
+    <h2><span class="no">01</span>고정지출 요약 (월)</h2>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>구분</th><th class="r">금액</th><th>주요 항목</th></tr></thead>
+        <tbody>
+          <tr><td>주거·대출</td><td class="r">2,994,591</td><td><span class="sub">방두원 대출 100만, 전세 대출 이자 79.4만, 효명 담보 대출 66.5만, 파라곤 관리비 35만, 사택 관리비 10만, 재산세 8.5만</span></td></tr>
+          <tr><td>보험</td><td class="r">816,610</td><td><span class="sub">건강보험 35.1만, 영맨 보험 25만, 자동차보험 15.5만, 운전자·화재 6.1만</span></td></tr>
+          <tr><td>통신·구독</td><td class="r">302,820</td><td><span class="sub">휴대폰 17만, 사택 통신 5만, SK브로드밴드 4.5만, 유튜브·넷플릭스 3.8만</span></td></tr>
+          <tr><td>기타</td><td class="r">110,000</td><td><span class="sub">모임회비</span></td></tr>
+          <tr><td>저축</td><td class="r">1,250,000</td><td><span class="sub">청년 적금 70만, 연금·저축성 보험 45만, 우대금리 적금 10만</span></td></tr>
+          <tr><td>커통 잔여 생활비</td><td class="r">250,000</td><td><span class="sub">커통 입금 60만 − 관리비 35만</span></td></tr>
+          <tr class="sum"><td>합계</td><td class="r">5,724,021</td><td><span class="sub">종료된 주택 담보 대출(1,316,715)은 제외</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="no">02</span>지출계획: 남는 272만 원 나누기</h2>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>용도</th><th class="r">월 금액</th><th>설명</th></tr></thead>
+        <tbody>
+          <tr><td>개인 용돈</td><td class="r">800,000</td><td><span class="sub">각자 40만 원 (개인 카드, 점심, 교통)</span></td></tr>
+          <tr><td>커플통장 생활비 증액</td><td class="r">300,000</td><td><span class="sub">식비·생활비 25만 → 55만</span></td></tr>
+          <tr><td>비정기 지출 적립</td><td class="r">250,000</td><td><span class="sub">명절, 경조사, 차 정비, 여행</span></td></tr>
+          <tr class="sum"><td>비상금 → 투자</td><td class="r">≈1,366,000</td><td><span class="sub">03·04 참고</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout">
+      <b>분담 조정안</b><br>
+      방울 → 영맨 분담금을 <span class="num">521,676</span>원에서 <b>약 56만 원</b>으로 올려요. 그러면 영맨 용돈 40만 원이 맞춰져요.<br>
+      커통 증액, 비정기 적립, 비상금은 방울의 남는 돈(약 231만 원)에서 내요. 231만 − 용돈 40만 − 30만 − 25만 = 약 136만 원이 비상금·투자로 가요.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="no">03</span>적금계획</h2>
+    <ol class="steps">
+      <li><b>비상금 1,270만 원 (고정지출 3개월치).</b> 우대금리용 의무 보유 200만 원을 빼면 1,070만 원이 남아요. 월 136만 원씩 모으면 <b>약 8개월</b>. 파킹통장이나 CMA에 두기.</li>
+      <li><b>청년 적금 70만, 전세 대출 우대금리 적금 10만은 그대로 유지.</b> 청년 적금은 중간에 깨면 정부 지원금과 비과세 혜택을 잃어요.</li>
+      <li><b>연금·저축성 보험 45만 원.</b> 15만 원짜리를 10만 원 적금으로 바꾸는 계획은 괜찮아요. 해지 전에 해지환급금부터 확인하기.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2><span class="no">04</span>투자계획 (비상금을 다 모은 뒤, 월 약 137만 원)</h2>
+    <div class="callout warn">특정 상품이나 투자 비중 추천이 아니라 일반적인 참고 사항이에요. 상품 선택은 증권사·은행 상담이나 공인 재무설계사와 정하세요.</div>
+    <ul class="points">
+      <li><b>대출 금리와 먼저 비교하기.</b> 방두원 대출(월 166만 원)과 전세 대출의 금리가 기대 투자 수익률보다 높으면, 일부 조기 상환이 더 확실하게 돈을 아끼는 방법이에요.</li>
+      <li><b>연금저축·IRP 세액공제는 영맨 명의가 유리할 수 있어요.</b> 총급여 5,500만 원 이하는 공제율 16.5%, 넘으면 13.2%. 연간 공제 한도는 합산 900만 원이고, 방울의 ETF 연금 30만 원도 함께 고려해야 해요.</li>
+      <li><b>ISA.</b> 수익 중 일정 금액까지 비과세, 연간 2,000만 원까지 납입 가능.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><span class="no">05</span>함께 확인할 것</h2>
+    <ul class="check">
+      <li><label><input type="checkbox" id="c1"><span>넷플릭스 중복 확인 (유튜브 메모에 포함된 13,500원 + 별도 14,000원)</span></label></li>
+      <li><label><input type="checkbox" id="c2"><span>자동차보험 두 건(104,970 + 50,000), 차가 두 대인지 확인</span></label></li>
+      <li><label><input type="checkbox" id="c3"><span>개인 보험 월 60만 원, 두 사람 보장이 겹치는지 점검</span></label></li>
+      <li><label><input type="checkbox" id="c4"><span>방두원 대출·전세 대출 금리와 남은 기간 기록</span></label></li>
+      <li><label><input type="checkbox" id="c5"><span>실제 급여명세서로 실수령액 업데이트</span></label></li>
+    </ul>
+    <p class="note">체크 표시는 보는 사람의 브라우저에만 저장돼요.</p>
+  </section>
+
+  <footer>노션 ‘밍밍 고정 지출’의 지출 내역과 연봉(세전)으로 만든 추정 계획이에요. 실수령액은 2026년 요율로 계산한 추정치예요.</footer>
+</div>
+
+<script>
+document.querySelectorAll('.check input').forEach(function (el) {
+  try { el.checked = localStorage.getItem('mm-' + el.id) === '1'; } catch (e) {}
+  el.addEventListener('change', function () {
+    try { localStorage.setItem('mm-' + el.id, el.checked ? '1' : '0'); } catch (e) {}
+  });
+});
+</script>
+</body>
+
+</html>
